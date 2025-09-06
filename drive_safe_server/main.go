@@ -1,0 +1,193 @@
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"log"
+	"math"
+	"net/http"
+	"os"
+	"sort"
+	"time"
+
+	"drive_safe_server/db"
+
+	"github.com/joho/godotenv"
+)
+
+type ParkingSession struct {
+	SessionID string `json:"session_id"`
+	CarID     string `json:"car_id"`
+	StartedAt string `json:"started_at"`
+	StoppedAt string `json:"stopped_at,omitempty"`
+	Duration  int    `json:"duration_minutes,omitempty"`
+}
+
+type SOS struct {
+	CarID     string  `json:"car_id"`
+	Latitude  float64 `json:"latitude"`
+	Longitude float64 `json:"longitude"`
+	Timestamp string  `json:"timestamp"`
+}
+
+func distance(lat1, lon1, lat2, lon2 float64) float64 {
+	const R = 6371
+	dLat := (lat2 - lat1) * math.Pi / 180.0
+	dLon := (lon2 - lon1) * math.Pi / 180.0
+	lat1 = lat1 * math.Pi / 180.0
+	lat2 = lat2 * math.Pi / 180.0
+
+	a := math.Sin(dLat/2)*math.Sin(dLat/2) +
+		math.Sin(dLon/2)*math.Sin(dLon/2)*math.Cos(lat1)*math.Cos(lat2)
+	c := 2 * math.Atan2(math.Sqrt(a), math.Sqrt(1-a))
+	return R * c
+}
+
+func main() {
+	// Load environment variables
+	err := godotenv.Load()
+	if err != nil {
+		log.Println("⚠️ .env file not found, falling back to system env")
+	}
+
+	dbConn := db.ConnectAndInit()
+
+	// --- APIs ---
+
+	// Latest car location
+	http.HandleFunc("/api/location", func(w http.ResponseWriter, r *http.Request) {
+		var latitude, longitude float64
+		err := dbConn.QueryRow(`SELECT latitude, longitude FROM car_data ORDER BY updated_at DESC LIMIT 1`).Scan(&latitude, &longitude)
+		if err != nil {
+			http.Error(w, "No location data", http.StatusNotFound)
+			return
+		}
+		json.NewEncoder(w).Encode(map[string]float64{
+			"latitude":  latitude,
+			"longitude": longitude,
+		})
+	})
+
+	// Start parking
+	http.HandleFunc("/api/parking/start", func(w http.ResponseWriter, r *http.Request) {
+		carID := r.URL.Query().Get("car_id")
+		if carID == "" {
+			carID = "CAR123"
+		}
+		sessionID := fmt.Sprintf("PARK-%d", time.Now().Unix())
+
+		_, err := dbConn.Exec(`INSERT INTO parking_sessions (session_id, car_id, started_at) VALUES ($1, $2, $3)`,
+			sessionID, carID, time.Now().UTC())
+		if err != nil {
+			http.Error(w, "Failed to start parking session", http.StatusInternalServerError)
+			return
+		}
+
+		json.NewEncoder(w).Encode(ParkingSession{
+			SessionID: sessionID,
+			CarID:     carID,
+			StartedAt: time.Now().Format(time.RFC3339),
+		})
+	})
+
+	// Stop parking
+	http.HandleFunc("/api/parking/stop", func(w http.ResponseWriter, r *http.Request) {
+		sessionID := r.URL.Query().Get("session_id")
+		if sessionID == "" {
+			http.Error(w, "session_id required", http.StatusBadRequest)
+			return
+		}
+
+		var startedAt time.Time
+		err := dbConn.QueryRow(`SELECT started_at FROM parking_sessions WHERE session_id=$1`, sessionID).Scan(&startedAt)
+		if err != nil {
+			http.Error(w, "Session not found", http.StatusNotFound)
+			return
+		}
+
+		duration := int(time.Since(startedAt.UTC()).Minutes())
+
+		_, err = dbConn.Exec(`UPDATE parking_sessions SET stopped_at=$1, duration_minutes=$2 WHERE session_id=$3`,
+			time.Now(), duration, sessionID)
+		if err != nil {
+			http.Error(w, "Failed to stop session", http.StatusInternalServerError)
+			return
+		}
+
+		json.NewEncoder(w).Encode(ParkingSession{
+			SessionID: sessionID,
+			Duration:  duration,
+		})
+	})
+
+	// Nearest parking
+	http.HandleFunc("/api/parking/nearest", func(w http.ResponseWriter, r *http.Request) {
+		latStr := r.URL.Query().Get("lat")
+		lngStr := r.URL.Query().Get("lng")
+		if latStr == "" || lngStr == "" {
+			http.Error(w, "lat and lng query parameters required", http.StatusBadRequest)
+			return
+		}
+
+		var carLat, carLng float64
+		fmt.Sscanf(latStr, "%f", &carLat)
+		fmt.Sscanf(lngStr, "%f", &carLng)
+
+		parkingSpots := []map[string]interface{}{
+			{"name": "Central Parking", "lat": 28.614, "lng": 77.210, "available_slots": 5},
+			{"name": "East Side Parking", "lat": 28.615, "lng": 77.211, "available_slots": 2},
+			{"name": "West End Parking", "lat": 28.612, "lng": 77.208, "available_slots": 3},
+		}
+
+		for _, spot := range parkingSpots {
+			sLat := spot["lat"].(float64)
+			sLng := spot["lng"].(float64)
+			spot["distance_km"] = distance(carLat, carLng, sLat, sLng)
+		}
+
+		sort.Slice(parkingSpots, func(i, j int) bool {
+			return parkingSpots[i]["distance_km"].(float64) < parkingSpots[j]["distance_km"].(float64)
+		})
+
+		json.NewEncoder(w).Encode(parkingSpots)
+	})
+
+	// SOS
+	http.HandleFunc("/api/sos", func(w http.ResponseWriter, r *http.Request) {
+		carID := r.URL.Query().Get("car_id")
+		lat := r.URL.Query().Get("lat")
+		lng := r.URL.Query().Get("lng")
+
+		if carID == "" || lat == "" || lng == "" {
+			http.Error(w, "car_id, lat, lng required", http.StatusBadRequest)
+			return
+		}
+
+		var latitude, longitude float64
+		fmt.Sscanf(lat, "%f", &latitude)
+		fmt.Sscanf(lng, "%f", &longitude)
+
+		_, err := dbConn.Exec(`INSERT INTO sos_events (car_id, latitude, longitude) VALUES ($1, $2, $3)`,
+			carID, latitude, longitude)
+		if err != nil {
+			http.Error(w, "Failed to send SOS", http.StatusInternalServerError)
+			return
+		}
+
+		json.NewEncoder(w).Encode(SOS{
+			CarID:     carID,
+			Latitude:  latitude,
+			Longitude: longitude,
+			Timestamp: time.Now().Format(time.RFC3339),
+		})
+	})
+
+	// Get port from env or fallback to 8080
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	fmt.Println("🚀 Backend running on http://localhost:" + port)
+	log.Fatal(http.ListenAndServe(":"+port, nil))
+}
