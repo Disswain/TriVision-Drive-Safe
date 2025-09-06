@@ -1,0 +1,17 @@
+# Flutter 
+build/ 
+.flutter-plugins 
+.flutter-plugins-dependencies 
+.packages 
+ 
+# Go 
+*.exe 
+*.log 
+/vendor/ 
+ 
+# Secrets 
+*.env 
+ 
+# OS / Others 
+.DS_Store 
+Thumbs.db 
