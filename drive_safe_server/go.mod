@@ -18,6 +18,7 @@ require (
 	cloud.google.com/go/longrunning v0.6.7 // indirect
 	cloud.google.com/go/monitoring v1.24.2 // indirect
 	cloud.google.com/go/storage v1.54.0 // indirect
+	firebase.google.com/go v3.13.0+incompatible // indirect
 	firebase.google.com/go/v4 v4.15.2 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.27.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.51.0 // indirect
@@ -32,17 +33,22 @@ require (
 	github.com/go-jose/go-jose/v4 v4.1.0 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
+	github.com/go-resty/resty/v2 v2.16.5 // indirect
 	github.com/gofrs/uuid v4.4.0+incompatible // indirect
+	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang-jwt/jwt/v4 v4.5.2 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
+	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/google/s2a-go v0.1.9 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.6 // indirect
 	github.com/googleapis/gax-go/v2 v2.14.2 // indirect
+	github.com/gorilla/schema v1.1.0 // indirect
 	github.com/kevinburke/go-types v0.0.0-20240719050749-165e75e768f7 // indirect
 	github.com/kevinburke/rest v0.0.0-20250718180114-1a15e4f2364f // indirect
 	github.com/kevinburke/twilio-go v0.0.0-20250718182727-5fe7adc01f29 // indirect
 	github.com/planetscale/vtprotobuf v0.6.1-0.20240319094008-0393e58bdf10 // indirect
+	github.com/sfreiberg/gotwilio v1.0.0 // indirect
 	github.com/spiffe/go-spiffe/v2 v2.5.0 // indirect
 	github.com/ttacon/builder v0.0.0-20170518171403-c099f663e1c2 // indirect
 	github.com/ttacon/libphonenumber v1.2.1 // indirect
@@ -64,6 +70,7 @@ require (
 	golang.org/x/text v0.27.0 // indirect
 	golang.org/x/time v0.11.0 // indirect
 	google.golang.org/api v0.233.0 // indirect
+	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/appengine/v2 v2.0.6 // indirect
 	google.golang.org/genproto v0.0.0-20250519155744-55703ea1f237 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20250519155744-55703ea1f237 // indirect
