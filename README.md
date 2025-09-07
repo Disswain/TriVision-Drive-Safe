@@ -1,4 +1,4 @@
-# TriVision-Drive-Safe 🚗🛡️
+# 🚗 TriVision-Drive-Safe
 
 A Smart car safety and parking management system built for hackathons.  
 It provides live car tracking, SOS alerts with SMS + push notifications, parking session management, and blockchain-based SOS proof using NFTs.
@@ -14,10 +14,22 @@ It provides live car tracking, SOS alerts with SMS + push notifications, parking
 
 ---
 
-## 🛠️ Tech Stack
-- **Backend**: Go (net/http, PostgreSQL/SQLite, Twilio, Firebase Cloud Messaging, Verbwire API)
-- **Frontend**: Flutter + Firebase + jupyter
-- **Database**: PostgreSQL (or SQLite for local testing)
+## ⚙️ Tech Stack
+- **Backend:** Golang (with REST APIs)  
+- **Frontend:** Flutter (cross-platform app)  
+- **Database:** PostgreSQL (Supabase)  
+- **Notifications:** Twilio (SMS), Firebase Cloud Messaging (Push)  
+- **Blockchain:** Verbwire API (NFT minting for SOS proof)  
+- **Frameworks/Libs:** gofr (optional), godotenv, lib/pq  
+
+---
+
+## 🚀 Features Implemented
+- ✅ Real-time location API (`/api/location`)  
+- ✅ Parking APIs (`/api/parking/start`, `/api/parking/stop`, `/api/parking/nearest`)  
+- ✅ SOS API (`/api/sos`) → Sends Twilio SMS + FCM push + stores in DB  
+- ✅ NFT Proof of SOS (`Verbwire integration`)  
+- ✅ Secure DB with Supabase  
 
 ---
 
