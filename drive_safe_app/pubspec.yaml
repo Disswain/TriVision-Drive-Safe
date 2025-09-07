@@ -1,49 +1,25 @@
+name: drive_safe_app
+description: TriVision Drive Safe frontend
+publish_to: 'none'
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Car Tracking SOS</title>
-  <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
-  <style>
-    body { margin: 0; font-family: Arial, sans-serif; display: flex; flex-direction: column; height: 100vh; }
-    header { background-color: #1e88e5; color: white; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; }
-    #map { flex: 1; }
-    #sosButton { background-color: #e53935; color: white; font-size: 20px; padding: 15px; border: none; cursor: pointer; }
-    #sosButton:hover { background-color: #b71c1c; }
-  </style>
-</head>
-<body>
-  <header>🚗 Car Tracking SOS</header>
-  <div id="map"></div>
-  <button id="sosButton">🚨 Send SOS</button>
+environment:
+  sdk: ">=3.0.0 <4.0.0"
 
-  <script>
-    const socket = io();
-    let map; let marker;
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^1.2.0
+  geolocator: ^10.0.0
+  google_maps_flutter: ^2.6.1
+  url_launcher: ^6.3.0
+  flutter_spinkit: ^5.2.0
+  # provider: ^6.0.5
 
-    // Fix: Attach initMap to window so Google Maps API callback can find it
-    window.initMap = function(lat = 28.6139, lng = 77.2090) {
-      map = new google.maps.Map(document.getElementById('map'), { zoom: 15, center: { lat, lng } });
-      marker = new google.maps.Marker({ position: { lat, lng }, map, title: "Car", icon: "https://img.icons8.com/color/48/000000/car.png" });
-    }
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
 
-    socket.on("location-update", (loc) => {
-      const position = { lat: loc.lat, lng: loc.lng };
-      marker.setPosition(position);
-      map.panTo(position);
-    });
-
-    socket.on("sos-alert", (loc) => { alert(`🚨 SOS Alert! Car at ${loc.lat}, ${loc.lng}`); });
-
-    document.getElementById("sosButton").addEventListener("click", () => {
-      fetch("/sos", { method: "POST" }).then(res => res.json()).then(data => console.log(data));
-    });
-  </script>
-
-  <!-- FIXED: Add async defer + callback -->
-  <script async defer
-    src="https://maps.googleapis.com/maps/api/js?key=YOUR_REAL_API_KEY&callback=initMap">
-  </script>
-</body>
-</html>
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/
