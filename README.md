@@ -26,4 +26,4 @@ It provides live car tracking, SOS alerts with SMS + push notifications, parking
 ### 1. Clone the repository
 ```bash
 git clone https://github.com/<your-username>/TriVision-Drive-Safe.git
-cd TriVision-Drive-Safe
+cd TriVision-Drive-Safein the zone 
