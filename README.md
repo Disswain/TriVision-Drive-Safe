@@ -1,6 +1,6 @@
 # TriVision-Drive-Safe 🚗🛡️
 
-A smart car safety and parking management system built for hackathons.  
+A Smart car safety and parking management system built for hackathons.  
 It provides live car tracking, SOS alerts with SMS + push notifications, parking session management, and blockchain-based SOS proof using NFTs.
 
 ---
@@ -10,7 +10,7 @@ It provides live car tracking, SOS alerts with SMS + push notifications, parking
 - 🅿️ Start/Stop parking and track duration
 - 🚨 SOS button → sends Twilio SMS + Firebase push notification
 - 🗄️ Stores data in SQLite/Postgres
-- 🎨 Bonus: Mints SOS proof NFT using Verbwire
+- 🎨 Bonus: Mints SOS proof NFT using Verbwire.
 
 ---
 
