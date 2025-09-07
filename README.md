@@ -2,7 +2,7 @@
 
 A Smart car safety and parking management system built for hackathons.  
 It provides live car tracking, SOS alerts with SMS + push notifications, parking session management, and blockchain-based SOS proof using NFTs.
-
+    
 ---
 
 ## ✨ Features
